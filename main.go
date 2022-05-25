@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -52,6 +54,19 @@ func crawl(month int, day int) {
 			tmpMovies.Year = ef.ChildText("div.knownfor-year > span.knownfor-ellipsis")
 			topProfile.TopMovies = append(topProfile.TopMovies, tmpMovies)
 		})
+		js, err := json.MarshalIndent(topProfile, "", "   ")
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(string(js))
+	})
+
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("visiting ... ", r.URL.String())
+	})
+
+	infoCollector.OnRequest(func(r *colly.Request) {
+		fmt.Println("visiting profile ... ", r.URL.String())
 	})
 
 	startUrl := fmt.Sprintf("https://www.imdb.com/search/name/?birth_monthday=%d-%d", month, day)
