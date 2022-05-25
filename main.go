@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gobwas/glob/util/strings"
 	"github.com/gocolly/colly"
 )
 
@@ -46,6 +45,13 @@ func crawl(month int, day int) {
 		topProfile.jobTitle = h.ChildText("#name-job-categories > a > span.itemprop")
 		topProfile.birthDate = h.ChildAttr("#name-born-info time", "datetime")
 		topProfile.bio = strings.TrimSpace(h.ChildText("#name-bio-text > div.name-trivia-bio-text > div.inline"))
+
+		h.ForEach("div.knownfor-title", func(_ int, ef *colly.HTMLElement) {
+			tmpMovies := movies{}
+			tmpMovies.Title = ef.ChildText("div.knownfor-title-role > a.knownfor-ellipsis")
+			tmpMovies.Year = ef.ChildText("div.knownfor-year > span.knownfor-ellipsis")
+			topProfile.TopMovies = append(topProfile.TopMovies, tmpMovies)
+		})
 	})
 
 	startUrl := fmt.Sprintf("https://www.imdb.com/search/name/?birth_monthday=%d-%d", month, day)
